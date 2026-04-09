@@ -38,6 +38,8 @@
 
         .scroll-container {
             position: relative;
+            overflow-x: hidden;
+            width: 100%;
         }
 
         .hero-scroll-space {
@@ -592,6 +594,7 @@
             border: 1px solid rgba(0,0,0,0.06);
             border-radius: 16px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+            max-width: 100%;
             overflow: hidden;
         }
 
@@ -974,7 +977,16 @@
             50% { opacity: 0.5; transform: scale(0.85); }
         }
 
-        /* ── Responsive ── */
+        /* ══════════════════════════════════════
+           RESPONSIVE — Mobile-first overhaul
+           ══════════════════════════════════════ */
+
+        /* Prevent horizontal overflow globally */
+        html, body {
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
         @media (max-width: 1024px) {
             .usecase {
                 flex-direction: column !important;
@@ -989,29 +1001,158 @@
 
         @media (max-width: 900px) {
             .hero-content { left: 40px; right: 40px; max-width: 100%; }
-            #three-container { left: 20%; right: -15%; opacity: 0.35; }
-            .hero-content h1 { font-size: clamp(48px, 12vw, 80px); }
+            #three-container { left: -5%; right: -20%; opacity: 0.2; }
+            .hero-content h1 { font-size: clamp(44px, 11vw, 72px); }
+            .hero-sub { font-size: 15px; max-width: 100%; }
         }
 
         @media (max-width: 600px) {
-            nav { padding: 16px 20px; }
-            .hero-content { left: 24px; right: 24px; }
-            #three-container { left: 0; right: -20%; opacity: 0.25; }
-            .waitlist-form { flex-direction: column; width: 100%; }
-            .waitlist-form input[type="email"] { width: 100%; }
-            .waitlist-form button { width: 100%; min-height: 48px; }
-            .waitlist-extended .field-row { flex-direction: column; }
-            .waitlist-extended { max-width: 100%; }
+            /* Nav */
+            nav { padding: 14px 16px; }
+            .logo { font-size: 18px; gap: 8px; }
+            .logo-mark { width: 24px; height: 24px; border-radius: 6px; }
+
+            /* Hero */
+            .hero-content {
+                left: 20px; right: 20px;
+                top: 45%;
+            }
+            .hero-content h1 {
+                font-size: clamp(36px, 10vw, 56px);
+                margin-bottom: 18px;
+            }
+            .hero-sub {
+                font-size: 14px;
+                line-height: 1.55;
+                margin-bottom: 28px;
+                max-width: 100%;
+            }
+            .hero-badge {
+                font-size: 11px;
+                padding: 5px 12px 5px 10px;
+                margin-bottom: 20px;
+            }
+
+            /* Three.js sphere — center behind content, very subtle on mobile */
+            #three-container {
+                left: -20%;
+                right: -20%;
+                top: -10%;
+                opacity: 0.12;
+                z-index: 0;
+            }
+
+            /* Scroll hint */
+            .scroll-hint { bottom: 20px; }
+            .scroll-hint span { font-size: 10px; }
+
+            /* ── Forms (critical for mobile zoom fix) ── */
+            .waitlist-form {
+                flex-direction: column;
+                width: 100%;
+            }
+            .waitlist-form input[type="email"] {
+                width: 100%;
+                font-size: 16px;  /* prevents iOS zoom */
+                padding: 14px 16px;
+                border-radius: 10px;
+            }
+            .waitlist-form button {
+                width: 100%;
+                min-height: 48px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+
+            .waitlist-extended {
+                max-width: 100%;
+                gap: 8px;
+            }
+            .waitlist-extended .field-row {
+                flex-direction: column;
+                gap: 8px;
+            }
             .waitlist-extended input,
-            .waitlist-extended select { min-height: 48px; font-size: 16px; }
-            .waitlist-extended .submit-btn { width: 100%; min-height: 48px; }
-            .waitlist-extended .skip-link { padding: 12px 0; font-size: 14px; }
+            .waitlist-extended select {
+                min-height: 48px;
+                font-size: 16px;  /* prevents iOS zoom */
+                padding: 14px 16px;
+                border-radius: 10px;
+            }
+            .waitlist-extended .submit-btn {
+                width: 100%;
+                min-height: 48px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+            .waitlist-extended .skip-link {
+                padding: 14px 0;
+                font-size: 14px;
+            }
+            .email-captured-note {
+                font-size: 13px;
+                margin-top: 8px;
+            }
+
+            /* Statements */
+            .statements-pin-container { padding: 24px 20px; }
+            .statement-main {
+                font-size: clamp(28px, 7vw, 48px) !important;
+                padding: 0 8px;
+            }
+            .statement-reveal {
+                font-size: clamp(15px, 4vw, 22px) !important;
+                padding: 0 8px;
+                margin-top: 16px;
+            }
+
+            /* Use cases */
+            .usecases-section { padding: 60px 0 30px; }
+            .usecases-header { padding: 0 20px; }
+            .usecases-header h2 { font-size: clamp(28px, 7vw, 48px); }
+            .usecases-header .subline { font-size: 14px; }
+            .usecase {
+                padding: 0 20px;
+                margin-bottom: 50px;
+                gap: 24px;
+            }
+            .usecase-text h3 { font-size: clamp(24px, 6vw, 36px); }
+            .usecase-text .desc { font-size: 14px; max-width: 100%; }
+            .usecase-text .crucible-twist { font-size: 13px; max-width: 100%; }
+            .usecase-icon { width: 40px; height: 40px; font-size: 18px; }
+
+            /* Agent viz cards */
+            .agent-viz-card { border-radius: 12px; }
+            .agent-viz-header { padding: 12px 16px; }
+            .agent-viz-body { padding: 12px 16px; }
+            .agent-viz-footer { padding: 8px 16px; }
+            .agent-task .task-name { font-size: 12px; }
+            .agent-task .task-detail { font-size: 10px; }
+            .tool-tag { font-size: 9px; }
+
+            /* Reveal */
+            .reveal-sticky { padding: 24px 20px; }
+            .reveal-content p { font-size: clamp(22px, 5.5vw, 40px); }
+
+            /* Bottom CTA */
+            .bottom-cta {
+                padding: 40px 20px;
+                gap: 24px;
+                height: auto;
+                min-height: 100vh;
+            }
+            .bottom-cta h2 { font-size: clamp(32px, 8vw, 52px); }
+            .bottom-cta .sub { font-size: 14px; max-width: 100%; }
             .bottom-cta .waitlist-form { align-items: stretch; }
-            .statement-sticky { padding: 24px; }
-            .reveal-sticky { padding: 24px; }
-            .bottom-cta { padding: 24px; }
-            .usecase { padding: 0 24px; margin-bottom: 60px; }
-            .usecases-section { padding: 80px 0 40px; }
+        }
+
+        /* Extra small screens (iPhone SE, etc.) */
+        @media (max-width: 375px) {
+            .hero-content { left: 16px; right: 16px; }
+            .hero-content h1 { font-size: 32px; }
+            .hero-sub { font-size: 13px; margin-bottom: 24px; }
+            .statement-main { font-size: 26px !important; }
+            .usecase { padding: 0 16px; }
         }
     </style>
 </head>
