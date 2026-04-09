@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crucible - The Brain That Thinks. The Body That Acts.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #faf9f7;
+            --text: #1a1a1a;
+            --text-secondary: #555;
+            --text-muted: #999;
+            --coral: #f97066;
+            --purple: #c4b5fd;
+            --teal: #67d4e2;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ══════════════════════════════════════
+           PHASE 1: Hero — sticky for sphere zoom
+           ══════════════════════════════════════ */
+
+        .scroll-container {
+            position: relative;
+        }
+
+        .hero-scroll-space {
+            height: 150vh;
+            position: relative;
+        }
+
+        .hero-sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 90% 80% at 65% 50%, rgba(249, 112, 102, 0.28) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 70% at 75% 25%, rgba(196, 181, 253, 0.35) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 60% at 55% 75%, rgba(251, 164, 160, 0.22) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 50% at 80% 65%, rgba(103, 212, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 25% 40%, rgba(245, 166, 35, 0.08) 0%, transparent 50%);
+            filter: blur(60px) saturate(1.3);
+            transition: opacity 0.3s;
+        }
+
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 40%;
+            right: -5%;
+            width: auto;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+            transition: none;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px) saturate(1.4);
+            -webkit-backdrop-filter: blur(20px) saturate(1.4);
+            background: rgba(250, 249, 247, 0.5);
+            transition: opacity 0.4s, transform 0.4s;
+        }
+
+        nav.hidden {
+            opacity: 0;
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-mark {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #f97066, #fba4a0, #c4b5fd, #67d4e2);
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .nav-cta {
+            padding: 10px 24px;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        /* Hero content — left side */
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 80px;
+            transform: translateY(-50%);
+            z-index: 10;
+            max-width: 660px;
+            transition: opacity 0.3s;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 16px 7px 12px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 0.7s ease;
+        }
+
+        .hero-badge .dot {
+            width: 7px; height: 7px;
+            background: var(--coral);
+            border-radius: 50%;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        .hero-content h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(52px, 6.5vw, 100px);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            line-height: 0.92;
+            color: var(--text);
+            margin-bottom: 28px;
+            animation: fadeInUp 0.7s ease 0.1s both;
+        }
+
+        .hero-content h1 .gradient-word {
+            background: linear-gradient(135deg, var(--coral), var(--purple), var(--teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 460px;
+            line-height: 1.65;
+            margin-bottom: 40px;
+            font-weight: 400;
+            animation: fadeInUp 0.7s ease 0.2s both;
+        }
+
+        /* ── Waitlist Form (Progressive) ── */
+        .waitlist-form {
+            display: flex;
+            gap: 10px;
+            animation: fadeInUp 0.7s ease 0.3s both;
+        }
+
+        .waitlist-form input[type="email"] {
+            padding: 14px 18px;
+            width: 260px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .waitlist-form input::placeholder { color: var(--text-muted); }
+        .waitlist-form input:focus,
+        .waitlist-extended input:focus,
+        .waitlist-extended select:focus {
+            border-color: rgba(0,0,0,0.15);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
+        }
+
+        .waitlist-form button {
+            padding: 14px 28px;
+            background: var(--text);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .waitlist-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        /* Extended fields (slides in after email) */
+        .waitlist-extended {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 14px;
+            max-width: 440px;
+        }
+
+        .waitlist-extended.visible {
+            display: flex;
+            animation: fadeInUp 0.4s ease both;
+        }
+
+        .waitlist-extended .field-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .waitlist-extended input,
+        .waitlist-extended select {
+            padding: 12px 16px;
+            width: 100%;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .waitlist-extended select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+
+        .waitlist-extended .submit-btn {
+            padding: 14px 28px;
+            background: var(--text);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', sans-serif;
+            margin-top: 4px;
+        }
+
+        .waitlist-extended .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .waitlist-extended .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .waitlist-extended .skip-link {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            margin-top: 2px;
+            transition: color 0.2s;
+        }
+
+        .waitlist-extended .skip-link:hover {
+            color: var(--text-secondary);
+            text-decoration: underline;
+        }
+
+        .email-captured-note {
+            font-size: 12px;
+            color: #16a34a;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .email-captured-note.visible {
+            display: block;
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        .waitlist-success {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-radius: 10px;
+            color: #16a34a;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Scroll hint */
+        .scroll-hint {
+            position: absolute;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: fadeInUp 0.7s ease 0.5s both;
+        }
+
+        .scroll-hint .arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 1.5px solid var(--text-muted);
+            border-bottom: 1.5px solid var(--text-muted);
+            transform: rotate(45deg);
+            animation: bounceDown 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceDown {
+            0%, 100% { transform: rotate(45deg) translateY(0); }
+            50% { transform: rotate(45deg) translateY(6px); }
+        }
+
+        /* ══════════════════════════════════════
+           PHASE 3: Bold Statements (kept for transition)
+           ══════════════════════════════════════ */
+
+        .statements-section {
+            position: relative;
+            z-index: 2;
+        }
+
+        .statements-pin-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background: var(--bg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .statement-slide {
+            position: absolute;
+            text-align: center;
+            max-width: 900px;
+            z-index: 2;
+            will-change: opacity, transform;
+        }
+
+        .statement-main {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(40px, 6vw, 80px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1.05;
+            color: var(--text);
+        }
+
+        .statement-reveal {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(20px, 2.5vw, 32px);
+            font-weight: 400;
+            color: #9b7a8f;
+            line-height: 1.5;
+            margin-top: 24px;
+        }
+
+        /* ══════════════════════════════════════
+           USE CASES — Tasklet-inspired with agent viz
+           ══════════════════════════════════════ */
+
+        .usecases-section {
+            position: relative;
+            z-index: 3;
+            background: var(--bg);
+            padding: 120px 0 80px;
+        }
+
+        .usecases-header {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 0;
+            padding: 0 40px;
+        }
+
+        .usecases-header .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(249, 112, 102, 0.08);
+            border: 1px solid rgba(249, 112, 102, 0.15);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--coral);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .usecases-header h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1.05;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .usecases-header h2 em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--coral), var(--purple), var(--teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .usecases-header .subline {
+            font-family: 'Inter', sans-serif;
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Individual use case card */
+        .usecase {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            max-width: 1200px;
+            margin: 0 auto 100px;
+            padding: 0 60px;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .usecase.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .usecase:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .usecase-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .usecase-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(249,112,102,0.1), rgba(196,181,253,0.15));
+            border: 1px solid rgba(249,112,102,0.1);
+        }
+
+        .usecase-text h3 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(28px, 3.5vw, 42px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: -0.3px;
+            line-height: 1.1;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .usecase-text .desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 18px;
+            max-width: 440px;
+        }
+
+        .usecase-text .crucible-twist {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--coral);
+            font-weight: 500;
+            line-height: 1.6;
+            padding: 12px 16px;
+            background: rgba(249,112,102,0.05);
+            border-left: 3px solid var(--coral);
+            border-radius: 0 8px 8px 0;
+            max-width: 440px;
+        }
+
+        /* Agent viz container */
+        .usecase-viz {
+            flex: 1;
+            min-width: 0;
+            max-width: 520px;
+        }
+
+        .agent-viz-card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+
+        .agent-viz-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(250,249,247,0.5);
+        }
+
+        .agent-viz-header .agent-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--coral);
+            animation: agentPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes agentPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(249,112,102,0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(249,112,102,0); }
+        }
+
+        .agent-viz-header .agent-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.3px;
+        }
+
+        .agent-viz-header .agent-status {
+            margin-left: auto;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--teal);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .agent-viz-header .agent-status .spin {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border: 1.5px solid rgba(103,212,226,0.3);
+            border-top-color: var(--teal);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .agent-viz-body {
+            padding: 16px 20px;
+        }
+
+        .agent-task {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .agent-task:last-child {
+            border-bottom: none;
+        }
+
+        .agent-task .task-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            position: relative;
+        }
+
+        /* Status icon states */
+        .task-icon .icon-pending {
+            width: 16px; height: 16px;
+            border: 1.5px solid #ccc;
+            border-radius: 50%;
+        }
+
+        .task-icon .icon-running {
+            width: 16px; height: 16px;
+            border: 1.5px solid rgba(249,112,102,0.3);
+            border-top-color: var(--coral);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .task-icon .icon-done {
+            width: 16px; height: 16px;
+            background: var(--teal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .task-icon .icon-done::after {
+            content: '';
+            width: 5px;
+            height: 8px;
+            border: solid #fff;
+            border-width: 0 1.5px 1.5px 0;
+            transform: rotate(45deg);
+            position: absolute;
+            top: 2.5px;
+            left: 5px;
+        }
+
+        .agent-task .task-content {
+            flex: 1;
+        }
+
+        .agent-task .task-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .agent-task .task-detail {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        .agent-task .task-tools {
+            display: flex;
+            gap: 4px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+
+        .agent-task .tool-tag {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 500;
+            padding: 2px 7px;
+            background: rgba(196,181,253,0.12);
+            color: #7c6aad;
+            border-radius: 4px;
+        }
+
+        .agent-task.is-done .task-name {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .agent-task.is-running {
+            background: rgba(249,112,102,0.03);
+            border-radius: 8px;
+            margin: 0 -8px;
+            padding: 8px 8px;
+        }
+
+        /* Subtask connector line */
+        .agent-subtasks {
+            margin-left: 8px;
+            padding-left: 16px;
+            border-left: 1.5px dashed rgba(0,0,0,0.08);
+        }
+
+        .agent-subtask {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+        }
+
+        .agent-subtask .sub-icon {
+            width: 12px; height: 12px;
+            flex-shrink: 0;
+        }
+
+        .sub-icon .mini-pending {
+            width: 10px; height: 10px;
+            border: 1.5px solid #ddd;
+            border-radius: 50%;
+        }
+
+        .sub-icon .mini-running {
+            width: 10px; height: 10px;
+            border: 1.5px solid rgba(249,112,102,0.3);
+            border-top-color: var(--coral);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .sub-icon .mini-done {
+            width: 10px; height: 10px;
+            background: var(--teal);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .sub-icon .mini-done::after {
+            content: '';
+            width: 3px; height: 5.5px;
+            border: solid #fff;
+            border-width: 0 1.2px 1.2px 0;
+            transform: rotate(45deg);
+            position: absolute;
+            top: 1.5px;
+            left: 3px;
+        }
+
+        .agent-subtask .sub-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 11.5px;
+            color: var(--text-secondary);
+        }
+
+        .agent-subtask.sub-done .sub-name {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        /* Agent viz footer */
+        .agent-viz-footer {
+            padding: 10px 20px;
+            border-top: 1px solid rgba(0,0,0,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(250,249,247,0.3);
+        }
+
+        .agent-viz-footer .progress-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .agent-viz-footer .progress-bar {
+            width: 80px;
+            height: 4px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .agent-viz-footer .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--coral), var(--teal));
+            border-radius: 2px;
+            transition: width 0.6s ease;
+        }
+
+
+        /* ══════════════════════════════════════
+           PHASE 4: Final Reveal
+           ══════════════════════════════════════ */
+
+        .reveal-section {
+            height: 120vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        .reveal-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .reveal-gradient {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 100% 80% at 50% 50%, rgba(249, 112, 102, 0.2) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 60% at 30% 40%, rgba(196, 181, 253, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 50% at 70% 60%, rgba(103, 212, 226, 0.15) 0%, transparent 50%);
+            filter: blur(60px);
+            opacity: 0;
+            transition: opacity 0.6s;
+        }
+
+        .reveal-gradient.visible { opacity: 1; }
+
+        .reveal-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal-content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-content p {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(28px, 4vw, 52px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+            color: var(--text);
+        }
+
+        .reveal-content p em {
+            font-style: normal;
+            background: linear-gradient(135deg, #f97066, #c4b5fd, #67d4e2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ══════════════════════════════════════
+           Bottom CTA
+           ══════════════════════════════════════ */
+
+        .bottom-cta {
+            position: relative;
+            z-index: 2;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 32px;
+            padding: 40px;
+            text-align: center;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 50%, rgba(249, 112, 102, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 60% 55%, rgba(196, 181, 253, 0.07) 0%, transparent 50%),
+                var(--bg);
+        }
+
+        .bottom-cta h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(40px, 5vw, 64px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+
+        .bottom-cta .sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 520px;
+            line-height: 1.6;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .usecase {
+                flex-direction: column !important;
+                gap: 40px;
+                padding: 0 40px;
+            }
+            .usecase-viz {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .hero-content { left: 40px; right: 40px; max-width: 100%; }
+            #three-container { left: 20%; right: -15%; opacity: 0.35; }
+            .hero-content h1 { font-size: clamp(48px, 12vw, 80px); }
+        }
+
+        @media (max-width: 600px) {
+            nav { padding: 16px 20px; }
+            .hero-content { left: 24px; right: 24px; }
+            #three-container { left: 0; right: -20%; opacity: 0.25; }
+            .waitlist-form { flex-direction: column; width: 100%; }
+            .waitlist-form input[type="email"] { width: 100%; }
+            .waitlist-form button { width: 100%; }
+            .waitlist-extended .field-row { flex-direction: column; }
+            .waitlist-extended { max-width: 100%; }
+            .statement-sticky { padding: 24px; }
+            .reveal-sticky { padding: 24px; }
+            .bottom-cta { padding: 24px; }
+            .usecase { padding: 0 24px; margin-bottom: 60px; }
+            .usecases-section { padding: 80px 0 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="scroll-container">
+
+    <!-- Three.js sphere — fixed background layer -->
+    <div id="three-container"></div>
+
+    <!-- Nav (fixed) -->
+    <nav id="main-nav">
+        <div class="logo">
+            <div class="logo-mark"></div>
+            <span>Crucible</span>
+        </div>
+        <button class="nav-cta" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); setTimeout(function(){ document.getElementById('email-input').focus(); }, 400);">
+            Join Waitlist
+        </button>
+    </nav>
+
+    <!-- ═══ PHASE 1+2: Hero with sphere zoom scroll ═══ -->
+    <div class="hero-scroll-space" id="hero-scroll-space">
+        <div class="hero-sticky" id="hero-sticky">
+            <div class="hero-gradient" id="hero-gradient"></div>
+
+            <div class="hero-content" id="hero-content">
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Your AI Taskforce
+                </div>
+                <h1>A Brain<br>that thinks.<br><span class="gradient-word">A body<br>that acts.</span></h1>
+                <p class="hero-sub">
+                    An intelligence layer that compounds everything your team knows, then deploys agents that act on it while you sleep. Not another tool to build agents. The one that already knows what needs doing.
+                </p>
+                <div id="waitlist-container">
+                    <div class="waitlist-form" id="waitlist-form">
+                        <input type="email" placeholder="your@email.com" id="email-input" />
+                        <button onclick="handleEmailStep('top')">Join the Waitlist</button>
+                    </div>
+                    <div class="email-captured-note" id="email-note-top">✓ Email saved — tell us a bit more so we can prioritize you</div>
+                    <div class="waitlist-extended" id="extended-top">
+                        <div class="field-row">
+                            <input type="text" placeholder="Your name" id="name-top" />
+                            <input type="text" placeholder="Company / Org" id="company-top" />
+                        </div>
+                        <div class="field-row">
+                            <select id="role-top">
+                                <option value="" disabled selected>Your role</option>
+                                <option value="Founder / CEO">Founder / CEO</option>
+                                <option value="CTO / VP Eng">CTO / VP Eng</option>
+                                <option value="Product Manager">Product Manager</option>
+                                <option value="Engineer">Engineer</option>
+                                <option value="Designer">Designer</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <select id="use-top">
+                                <option value="" disabled selected>Use case</option>
+                                <option value="Personal productivity">Personal productivity</option>
+                                <option value="Small team (2-10)">Small team (2-10)</option>
+                                <option value="Mid team (11-50)">Mid team (11-50)</option>
+                                <option value="Large org (50+)">Large org (50+)</option>
+                            </select>
+                        </div>
+                        <button class="submit-btn" onclick="handleFullSubmit('top')">Complete Signup</button>
+                        <div class="skip-link" onclick="handleSkip('top')">Skip — just keep my email</div>
+                    </div>
+                    <div class="waitlist-success" id="waitlist-success">
+                        You're on the list. We'll be in touch.
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-hint" id="scroll-hint">
+                <span>Scroll</span>
+                <div class="arrow"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Bold Statements (scroll-pinned crossfader) ═══ -->
+    <div class="statements-section" id="statements-section">
+        <div class="statements-pin-container" id="statements-pin">
+
+            <!-- Slide 0 -->
+            <div class="statement-slide" id="stmt-slide-0">
+                <div class="statement-main" id="stmt-main-0">
+                    Other tools make you build agents
+                </div>
+                <div class="statement-reveal" id="stmt-reveal-0">
+                    Crucible already knows your world, and acts on it.
+                </div>
+            </div>
+
+            <!-- Slide 1 -->
+            <div class="statement-slide" id="stmt-slide-1">
+                <div class="statement-main" id="stmt-main-1">
+                    Your context is your competitive edge
+                </div>
+                <div class="statement-reveal" id="stmt-reveal-1">
+                    Every conversation, every doc, every signal, compounding into action.
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="statement-slide" id="stmt-slide-2">
+                <div class="statement-main" id="stmt-main-2">
+                    You wake up to results, not prompts
+                </div>
+                <div class="statement-reveal" id="stmt-reveal-2">
+                    Agents ran overnight. Here's what happened.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══ USE CASES: Tasklet-inspired, Knowledge-Graph powered ═══ -->
+    <div class="usecases-section">
+
+        <!-- USE CASE 1: Chief of Staff -->
+        <div class="usecase" id="uc-1">
+            <div class="usecase-text">
+                <div class="usecase-icon">🧠</div>
+                <h3>Chief of Staff</h3>
+                <p class="desc">
+                    Monitors your Slack, Linear, and email. Synthesizes what's happening across your org and tells you exactly what needs your attention today, before you ask.
+                </p>
+                <div class="crucible-twist">
+                    The knowledge graph already knows your org structure, priorities, and ongoing threads. No setup. No prompts. It just knows.
+                </div>
+            </div>
+            <div class="usecase-viz">
+                <div class="agent-viz-card" id="agent-viz-1">
+                    <div class="agent-viz-header">
+                        <div class="agent-dot"></div>
+                        <span class="agent-title">Chief of Staff Agent</span>
+                        <span class="agent-status"><span class="spin"></span> Running</span>
+                    </div>
+                    <div class="agent-viz-body">
+                        <!-- Tasks populated by JS -->
+                    </div>
+                    <div class="agent-viz-footer">
+                        <span class="progress-text">3 of 5 tasks</span>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 60%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USE CASE 2: Daily Briefing -->
+        <div class="usecase" id="uc-2">
+            <div class="usecase-text">
+                <div class="usecase-icon">📋</div>
+                <h3>Daily Briefing</h3>
+                <p class="desc">
+                    Aggregates your calendar, tasks, messages, and code reviews into a prioritized morning plan, with actions already taken on the obvious items.
+                </p>
+                <div class="crucible-twist">
+                    It ran overnight. Low-priority emails? Triaged. Meeting prep docs? Already pulled. You open your day to a briefing, not a backlog.
+                </div>
+            </div>
+            <div class="usecase-viz">
+                <div class="agent-viz-card" id="agent-viz-2">
+                    <div class="agent-viz-header">
+                        <div class="agent-dot"></div>
+                        <span class="agent-title">Morning Briefing Agent</span>
+                        <span class="agent-status"><span class="spin"></span> Running</span>
+                    </div>
+                    <div class="agent-viz-body"></div>
+                    <div class="agent-viz-footer">
+                        <span class="progress-text">2 of 4 tasks</span>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 50%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USE CASE 3: Competitor Intelligence -->
+        <div class="usecase" id="uc-3">
+            <div class="usecase-text">
+                <div class="usecase-icon">🔍</div>
+                <h3>Competitor Intelligence</h3>
+                <p class="desc">
+                    Monitors competitor websites, pricing changes, feature launches, and market moves. Researches impact and tells you what it means for your positioning.
+                </p>
+                <div class="crucible-twist">
+                    Your strategy docs, brand positioning, and past decisions live in the knowledge graph. Analysis is contextual to your business, not generic summaries.
+                </div>
+            </div>
+            <div class="usecase-viz">
+                <div class="agent-viz-card" id="agent-viz-3">
+                    <div class="agent-viz-header">
+                        <div class="agent-dot"></div>
+                        <span class="agent-title">Competitor Watch Agent</span>
+                        <span class="agent-status"><span class="spin"></span> Running</span>
+                    </div>
+                    <div class="agent-viz-body"></div>
+                    <div class="agent-viz-footer">
+                        <span class="progress-text">1 of 4 tasks</span>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 25%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USE CASE 4: Research Deep Dives -->
+        <div class="usecase" id="uc-4">
+            <div class="usecase-text">
+                <div class="usecase-icon">🔬</div>
+                <h3>Proactive Research</h3>
+                <p class="desc">
+                    When the knowledge graph detects a pattern, a recurring question, an emerging trend, a knowledge gap, it triggers a deep research agent and presents findings.
+                </p>
+                <div class="crucible-twist">
+                    You never asked. It noticed your team keeps discussing a topic without resolution. Research done. Memo drafted. Ready when you are.
+                </div>
+            </div>
+            <div class="usecase-viz">
+                <div class="agent-viz-card" id="agent-viz-4">
+                    <div class="agent-viz-header">
+                        <div class="agent-dot"></div>
+                        <span class="agent-title">Research Agent</span>
+                        <span class="agent-status"><span class="spin"></span> Running</span>
+                    </div>
+                    <div class="agent-viz-body"></div>
+                    <div class="agent-viz-footer">
+                        <span class="progress-text">2 of 5 tasks</span>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 40%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="usecases-header">
+            <div class="section-badge">Always-On Agents</div>
+            <h2>It doesn't wait for you<br>to <em>ask</em></h2>
+            <p class="subline">
+                Crucible's knowledge graph evolves with every signal. When it spots something that needs doing, it spins up an agent, executes, and presents results when you come online.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- ═══ PHASE 4: The Reveal ═══ -->
+    <div class="reveal-section" id="reveal-section">
+        <div class="reveal-sticky">
+            <div class="reveal-gradient" id="reveal-gradient"></div>
+            <div class="reveal-content" id="reveal-content">
+                <p>
+                    It <em>learns</em> everything your team knows.
+                    Then it <em>acts</em> on it.
+                    running agents in the background,
+                    presenting <em>results</em> when you arrive.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Bottom CTA ═══ -->
+    <div class="bottom-cta">
+        <h2>Your team, amplified</h2>
+        <p class="sub">
+            A knowledge graph that thinks. Agents that execute. Early access for teams ready to stop prompting and start compounding.
+        </p>
+        <div id="waitlist-container-bottom">
+            <div class="waitlist-form" id="waitlist-form-bottom" style="justify-content: center;">
+                <input type="email" placeholder="your@email.com" id="email-bottom" />
+                <button onclick="handleEmailStep('bottom')">Join the Waitlist</button>
+            </div>
+            <div class="email-captured-note" id="email-note-bottom">✓ Email saved — tell us a bit more so we can prioritize you</div>
+            <div class="waitlist-extended" id="extended-bottom">
+                <div class="field-row">
+                    <input type="text" placeholder="Your name" id="name-bottom" />
+                    <input type="text" placeholder="Company / Org" id="company-bottom" />
+                </div>
+                <div class="field-row">
+                    <select id="role-bottom">
+                        <option value="" disabled selected>Your role</option>
+                        <option value="Founder / CEO">Founder / CEO</option>
+                        <option value="CTO / VP Eng">CTO / VP Eng</option>
+                        <option value="Product Manager">Product Manager</option>
+                        <option value="Engineer">Engineer</option>
+                        <option value="Designer">Designer</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select id="use-bottom">
+                        <option value="" disabled selected>Use case</option>
+                        <option value="Personal productivity">Personal productivity</option>
+                        <option value="Small team (2-10)">Small team (2-10)</option>
+                        <option value="Mid team (11-50)">Mid team (11-50)</option>
+                        <option value="Large org (50+)">Large org (50+)</option>
+                    </select>
+                </div>
+                <button class="submit-btn" onclick="handleFullSubmit('bottom')">Complete Signup</button>
+                <div class="skip-link" onclick="handleSkip('bottom')">Skip — just keep my email</div>
+            </div>
+            <div class="waitlist-success" id="waitlist-success-bottom">
+                You're on the list. We'll be in touch.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+
+    /* ══════════════════════════════════════════
+       THREE.JS — Generative Sphere
+       ══════════════════════════════════════════ */
+
+    const container = document.getElementById('three-container');
+    let scene, camera, renderer, mesh, material, pointLight;
+
+    (function initThree() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.z = 3;
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const geometry = new THREE.IcosahedronGeometry(1.35, 64);
+        material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                pointLightPos: { value: new THREE.Vector3(0, 0, 2) },
+                color:  { value: new THREE.Color(0.98, 0.44, 0.40) },
+                color2: { value: new THREE.Color(0.77, 0.71, 0.99) },
+                color3: { value: new THREE.Color(0.40, 0.83, 0.89) },
+                alphaMultiplier: { value: 0.85 },
+            },
+            vertexShader: `
+                uniform float time;
+                varying vec3 vNormal;
+                varying vec3 vPosition;
+                varying float vDisplacement;
+
+                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+                vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+                float snoise(vec3 v) {
+                    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                    vec3 i = floor(v + dot(v, C.yyy));
+                    vec3 x0 = v - i + dot(i, C.xxx);
+                    vec3 g = step(x0.yzx, x0.xyz);
+                    vec3 l = 1.0 - g;
+                    vec3 i1 = min(g.xyz, l.zxy);
+                    vec3 i2 = max(g.xyz, l.zxy);
+                    vec3 x1 = x0 - i1 + C.xxx;
+                    vec3 x2 = x0 - i2 + C.yyy;
+                    vec3 x3 = x0 - D.yyy;
+                    i = mod289(i);
+                    vec4 p = permute(permute(permute(
+                                i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                    float n_ = 0.142857142857;
+                    vec3 ns = n_ * D.wyz - D.xzx;
+                    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                    vec4 x_ = floor(j * ns.z);
+                    vec4 y_ = floor(j - 7.0 * x_);
+                    vec4 x = x_ * ns.x + ns.yyyy;
+                    vec4 y = y_ * ns.x + ns.yyyy;
+                    vec4 h = 1.0 - abs(x) - abs(y);
+                    vec4 b0 = vec4(x.xy, y.xy);
+                    vec4 b1 = vec4(x.zw, y.zw);
+                    vec4 s0 = floor(b0) * 2.0 + 1.0;
+                    vec4 s1 = floor(b1) * 2.0 + 1.0;
+                    vec4 sh = -step(h, vec4(0.0));
+                    vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+                    vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+                    vec3 p0 = vec3(a0.xy, h.x);
+                    vec3 p1 = vec3(a0.zw, h.y);
+                    vec3 p2 = vec3(a1.xy, h.z);
+                    vec3 p3 = vec3(a1.zw, h.w);
+                    vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+                    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                    vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+                    m = m * m;
+                    return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+                }
+
+                void main() {
+                    vNormal = normal;
+                    vPosition = position;
+                    float displacement = snoise(position * 2.0 + time * 0.5) * 0.2;
+                    vDisplacement = displacement;
+                    vec3 newPosition = position + normal * displacement;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 color;
+                uniform vec3 color2;
+                uniform vec3 color3;
+                uniform vec3 pointLightPos;
+                uniform float alphaMultiplier;
+                varying vec3 vNormal;
+                varying vec3 vPosition;
+                varying float vDisplacement;
+
+                void main() {
+                    vec3 normal = normalize(vNormal);
+                    vec3 lightDir = normalize(pointLightPos - vPosition);
+                    float diffuse = max(dot(normal, lightDir), 0.0);
+                    diffuse = pow(diffuse, 0.8) * 1.4;
+
+                    float fresnel = 1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0)));
+                    fresnel = pow(fresnel, 1.5);
+
+                    float t = vDisplacement * 2.5 + 0.5;
+                    float yFactor = vPosition.y * 0.5 + 0.5;
+                    vec3 mixedColor = mix(color, color2, smoothstep(0.3, 0.7, t));
+                    mixedColor = mix(mixedColor, color3, smoothstep(0.5, 1.0, yFactor) * 0.4);
+
+                    vec3 finalColor = mixedColor * (diffuse + 0.05) + mixedColor * fresnel * 0.8;
+                    float alpha = clamp(diffuse * 0.6 + fresnel * 0.5 + 0.15, 0.0, 1.0) * alphaMultiplier;
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `,
+            wireframe: true,
+            transparent: true,
+        });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        pointLight = new THREE.PointLight(0xffffff, 2.5, 100);
+        pointLight.position.set(0, 0, 2.5);
+        scene.add(pointLight);
+    })();
+
+    // Cursor interaction
+    const LIGHT_Z = 2.0;
+    const LIGHT_RANGE = 6;
+    const targetLightPos = new THREE.Vector3(0, 0, LIGHT_Z);
+    const currentLightPos = new THREE.Vector3(0, 0, LIGHT_Z);
+    const targetRotOffset = { x: 0, y: 0 };
+    const currentRotOffset = { x: 0, y: 0 };
+    let baseRotY = 0, baseRotX = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const ny = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        targetLightPos.set(nx * LIGHT_RANGE, ny * LIGHT_RANGE, LIGHT_Z);
+        targetRotOffset.x = ny * 0.3;
+        targetRotOffset.y = nx * 0.3;
+    });
+
+    let cameraTargetZ = 3;
+
+    function animateThree(t) {
+        material.uniforms.time.value = t * 0.0003;
+
+        baseRotY += 0.0004;
+        baseRotX += 0.00015;
+
+        currentLightPos.lerp(targetLightPos, 0.12);
+        pointLight.position.copy(currentLightPos);
+        material.uniforms.pointLightPos.value.copy(currentLightPos);
+
+        currentRotOffset.x += (targetRotOffset.x - currentRotOffset.x) * 0.05;
+        currentRotOffset.y += (targetRotOffset.y - currentRotOffset.y) * 0.05;
+        mesh.rotation.x = baseRotX + currentRotOffset.x;
+        mesh.rotation.y = baseRotY + currentRotOffset.y;
+
+        camera.position.z += (cameraTargetZ - camera.position.z) * 0.08;
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animateThree);
+    }
+    animateThree(0);
+
+    window.addEventListener('resize', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    });
+
+
+    /* ══════════════════════════════════════════
+       AGENT VISUALIZATION — Looping Animations
+       ══════════════════════════════════════════ */
+
+    const agentConfigs = {
+        1: {
+            tasks: [
+                { name: 'Scan Slack channels for mentions', detail: 'Reading #general, #eng, #product...', tools: ['slack', 'knowledge-graph'], subtasks: [
+                    { name: 'Parse unread threads' },
+                    { name: 'Cross-reference with known priorities' },
+                    { name: 'Flag escalations' }
+                ]},
+                { name: 'Pull Linear updates & blockers', detail: 'Checking active sprint issues...', tools: ['linear', 'context-engine'] },
+                { name: 'Synthesize org-wide status', detail: 'Mapping dependencies across teams...', tools: ['knowledge-graph'] },
+                { name: 'Identify attention-required items', detail: 'Filtering signal from noise...', tools: ['priority-engine'] },
+                { name: 'Draft executive summary', detail: 'Compiling briefing document...', tools: ['doc-writer', 'knowledge-graph'] }
+            ]
+        },
+        2: {
+            tasks: [
+                { name: 'Fetch calendar for today', detail: 'Reading Google Calendar events...', tools: ['calendar', 'knowledge-graph'], subtasks: [
+                    { name: 'Identify meeting conflicts' },
+                    { name: 'Pull prep docs for each meeting' }
+                ]},
+                { name: 'Triage overnight emails', detail: 'Scanning inbox for action items...', tools: ['gmail', 'priority-engine'] },
+                { name: 'Check pending code reviews', detail: 'Reviewing open PRs assigned to you...', tools: ['github', 'context-engine'] },
+                { name: 'Compile prioritized day plan', detail: 'Ordering tasks by impact...', tools: ['knowledge-graph', 'doc-writer'] }
+            ]
+        },
+        3: {
+            tasks: [
+                { name: 'Monitor competitor websites', detail: 'Checking for pricing & feature changes...', tools: ['web-monitor', 'diff-engine'], subtasks: [
+                    { name: 'Detect UI/pricing changes' },
+                    { name: 'Capture changelog updates' }
+                ]},
+                { name: 'Cross-reference with our strategy', detail: 'Loading positioning docs from knowledge graph...', tools: ['knowledge-graph'] },
+                { name: 'Assess competitive impact', detail: 'Scoring threat level by market segment...', tools: ['analysis-engine'] },
+                { name: 'Draft positioning memo', detail: 'Writing actionable insights...', tools: ['doc-writer', 'knowledge-graph'] }
+            ]
+        },
+        4: {
+            tasks: [
+                { name: 'Detect recurring knowledge gap', detail: 'Analyzing conversation patterns...', tools: ['knowledge-graph', 'pattern-engine'], subtasks: [
+                    { name: 'Scan last 7 days of discussions' },
+                    { name: 'Identify unresolved questions' },
+                    { name: 'Score topic urgency' }
+                ]},
+                { name: 'Initiate deep research', detail: 'Searching web, papers, and internal docs...', tools: ['web-search', 'knowledge-graph'] },
+                { name: 'Synthesize findings', detail: 'Cross-referencing multiple sources...', tools: ['analysis-engine'] },
+                { name: 'Draft research memo', detail: 'Structuring key insights...', tools: ['doc-writer'] },
+                { name: 'File to knowledge base', detail: 'Updating wiki with new learnings...', tools: ['knowledge-graph'] }
+            ]
+        }
+    };
+
+    // Render a single agent viz
+    function renderAgentViz(vizId, config) {
+        const card = document.getElementById(`agent-viz-${vizId}`);
+        const body = card.querySelector('.agent-viz-body');
+        const footer = card.querySelector('.agent-viz-footer');
+        const progressText = footer.querySelector('.progress-text');
+        const progressFill = footer.querySelector('.progress-fill');
+
+        let currentStep = 0;
+        let subStep = 0;
+        const totalTasks = config.tasks.length;
+
+        function buildHTML(activeIdx, activeSubIdx) {
+            let html = '';
+            config.tasks.forEach((task, i) => {
+                const isDone = i < activeIdx;
+                const isRunning = i === activeIdx;
+                const isPending = i > activeIdx;
+
+                let iconHTML = '';
+                if (isDone) iconHTML = '<div class="icon-done"></div>';
+                else if (isRunning) iconHTML = '<div class="icon-running"></div>';
+                else iconHTML = '<div class="icon-pending"></div>';
+
+                const stateClass = isDone ? 'is-done' : (isRunning ? 'is-running' : '');
+
+                html += `<div class="agent-task ${stateClass}">
+                    <div class="task-icon">${iconHTML}</div>
+                    <div class="task-content">
+                        <div class="task-name">${task.name}</div>
+                        ${isRunning ? `<div class="task-detail">${task.detail}</div>` : ''}
+                        ${(isRunning || isDone) && task.tools ? `
+                            <div class="task-tools">
+                                ${task.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
+
+                // Subtasks
+                if (task.subtasks && (isRunning || isDone)) {
+                    html += '<div class="agent-subtasks">';
+                    task.subtasks.forEach((sub, si) => {
+                        let subDone = isDone || (isRunning && si < activeSubIdx);
+                        let subRunning = isRunning && si === activeSubIdx;
+                        let subIcon = '';
+                        if (subDone) subIcon = '<div class="mini-done"></div>';
+                        else if (subRunning) subIcon = '<div class="mini-running"></div>';
+                        else subIcon = '<div class="mini-pending"></div>';
+
+                        const subClass = subDone ? 'sub-done' : '';
+                        html += `<div class="agent-subtask ${subClass}">
+                            <div class="sub-icon">${subIcon}</div>
+                            <span class="sub-name">${sub.name}</span>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+            });
+            return html;
+        }
+
+        function tick() {
+            const task = config.tasks[currentStep];
+            const hasSubtasks = task && task.subtasks;
+
+            body.innerHTML = buildHTML(currentStep, subStep);
+
+            // Update progress
+            const completedCount = currentStep;
+            progressText.textContent = `${completedCount} of ${totalTasks} tasks`;
+            progressFill.style.width = `${(completedCount / totalTasks) * 100}%`;
+
+            // Advance
+            if (hasSubtasks && subStep < task.subtasks.length) {
+                subStep++;
+            } else {
+                currentStep++;
+                subStep = 0;
+            }
+
+            // Loop back when done
+            if (currentStep >= totalTasks) {
+                setTimeout(() => {
+                    currentStep = 0;
+                    subStep = 0;
+                    // Brief "reset" flash
+                    const statusEl = card.querySelector('.agent-status');
+                    if (statusEl) {
+                        statusEl.innerHTML = '<span class="spin"></span> Restarting...';
+                        setTimeout(() => {
+                            statusEl.innerHTML = '<span class="spin"></span> Running';
+                        }, 600);
+                    }
+                    tick();
+                }, 2000);
+                return;
+            }
+
+            // Next tick
+            const delay = hasSubtasks ? 800 : 1200;
+            setTimeout(tick, delay + Math.random() * 400);
+        }
+
+        // Staggered start per viz
+        setTimeout(tick, vizId * 500);
+    }
+
+    // Initialize all agent visualizations
+    Object.keys(agentConfigs).forEach(id => {
+        renderAgentViz(id, agentConfigs[id]);
+    });
+
+
+    /* ══════════════════════════════════════════
+       SCROLL CONTROLLER
+       ══════════════════════════════════════════ */
+
+    const heroScrollSpace = document.getElementById('hero-scroll-space');
+    const heroContent = document.getElementById('hero-content');
+    const heroGradient = document.getElementById('hero-gradient');
+    const scrollHint = document.getElementById('scroll-hint');
+    const threeContainer = document.getElementById('three-container');
+    const mainNav = document.getElementById('main-nav');
+
+    function onScroll() {
+        const scrollY = window.scrollY;
+        const heroHeight = heroScrollSpace.offsetHeight;
+        const viewportH = window.innerHeight;
+
+        // ── Phase 1→2: Hero scroll progress (0–1 over 1.5 extra viewports)
+        const heroScrollRange = heroHeight - viewportH;
+        const heroProgress = Math.min(Math.max(scrollY / heroScrollRange, 0), 1);
+
+        // Fade out hero text (0 → 0.3)
+        const textFade = 1 - Math.min(heroProgress / 0.3, 1);
+        heroContent.style.opacity = textFade;
+
+        // Fade out scroll hint faster
+        scrollHint.style.opacity = Math.max(1 - heroProgress * 5, 0);
+
+        // Hide nav during zoom, show again after hero
+        const pastHero = scrollY > heroHeight;
+        if (heroProgress > 0.2 && !pastHero) {
+            mainNav.classList.add('hidden');
+        } else {
+            mainNav.classList.remove('hidden');
+        }
+
+        // Move three-container from right-side to fullscreen
+        const containerProgress = Math.min(heroProgress / 0.5, 1);
+        const eased = containerProgress * containerProgress * (3 - 2 * containerProgress);
+        threeContainer.style.left = `${40 - 40 * eased}%`;
+        threeContainer.style.right = `${-5 + 5 * eased}%`;
+
+        // Update renderer to match new container size during expansion
+        const cw = threeContainer.clientWidth;
+        const ch = threeContainer.clientHeight;
+        if (cw > 0 && ch > 0 && (Math.abs(renderer.domElement.width / (window.devicePixelRatio || 1) - cw) > 2)) {
+            camera.aspect = cw / ch;
+            camera.updateProjectionMatrix();
+            renderer.setSize(cw, ch);
+        }
+
+        // Camera zooms IN
+        const zoomProgress = Math.max((heroProgress - 0.3) / 0.7, 0);
+        const zoomEased = zoomProgress * zoomProgress;
+        cameraTargetZ = 3 - zoomEased * 2.7;
+
+        heroGradient.style.opacity = 1 - zoomProgress;
+
+        if (material) {
+            material.uniforms.alphaMultiplier.value = 0.85 - zoomEased * 0.5;
+        }
+
+        // ── Phase 3: Bold statements (handled by separate scroll-pinned script below)
+
+        // ── Fade sphere out over statements section (first section after hero)
+        const statementsSection = document.querySelector('.statements-section');
+        const stmtsRect = statementsSection.getBoundingClientRect();
+        const stmtsBottom = stmtsRect.bottom;
+        const sphereFadeStart = viewportH * 1.5;
+        const sphereFadeEnd = viewportH * 0.5;
+        if (stmtsBottom < sphereFadeStart && stmtsBottom > 0) {
+            const fadeProg = 1 - Math.max((stmtsBottom - sphereFadeEnd) / (sphereFadeStart - sphereFadeEnd), 0);
+            threeContainer.style.opacity = 1 - fadeProg;
+        } else if (stmtsBottom <= 0) {
+            threeContainer.style.opacity = 0;
+        } else if (heroProgress >= 1) {
+            threeContainer.style.opacity = 1;
+        }
+
+        // ── Use case cards: fade in on scroll
+        document.querySelectorAll('.usecase').forEach(uc => {
+            const ucRect = uc.getBoundingClientRect();
+            if (ucRect.top < viewportH * 0.8) {
+                uc.classList.add('visible');
+            }
+        });
+
+        // ── Phase 4: Reveal
+        const revealSection = document.getElementById('reveal-section');
+        const revealRect = revealSection.getBoundingClientRect();
+        const revealProgress = Math.min(Math.max(-revealRect.top / (revealSection.offsetHeight - viewportH), 0), 1);
+
+        const revealGradient = document.getElementById('reveal-gradient');
+        const revealContent = document.getElementById('reveal-content');
+
+        if (revealProgress > 0.2) {
+            revealGradient.classList.add('visible');
+            revealContent.classList.add('visible');
+        } else {
+            revealGradient.classList.remove('visible');
+            revealContent.classList.remove('visible');
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+
+    /* ══════════════════════════════════════════
+       WAITLIST
+       ══════════════════════════════════════════ */
+
+    /* ══════════════════════════════════════════
+       WAITLIST — Progressive capture + Google Sheets
+       ══════════════════════════════════════════ */
+
+    // ⚠️  REPLACE THIS with your Google Apps Script deployment URL
+    const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyVW04RPgovZ0Adpm9GjWPSo9_7gIAyBTDrLGFKAdBiwwDbTKMg9ufMd_5RGTvnH_yn/exec';
+
+    // Track state per form location
+    const formState = { top: { email: null }, bottom: { email: null } };
+
+    // Helpers
+    function getIds(loc) {
+        const suffix = loc === 'top' ? '' : '-bottom';
+        const formSuffix = loc === 'top' ? '' : '-bottom';
+        return {
+            emailInput: document.getElementById(loc === 'top' ? 'email-input' : 'email-bottom'),
+            form: document.getElementById('waitlist-form' + formSuffix),
+            extended: document.getElementById('extended-' + loc),
+            note: document.getElementById('email-note-' + loc),
+            success: document.getElementById(loc === 'top' ? 'waitlist-success' : 'waitlist-success-bottom'),
+            name: document.getElementById('name-' + loc),
+            company: document.getElementById('company-' + loc),
+            role: document.getElementById('role-' + loc),
+            use: document.getElementById('use-' + loc),
+        };
+    }
+
+    function isValidEmail(e) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    }
+
+    // Submit to Google Sheets
+    async function submitToSheets(data) {
+        if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT.includes('YOUR_GOOGLE')) {
+            console.log('[DEV] Would submit:', data);
+            return { result: 'success' };
+        }
+        try {
+            const res = await fetch(SHEETS_ENDPOINT, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return { result: 'success' };
+        } catch (err) {
+            console.error('Sheets error:', err);
+            return { result: 'error' };
+        }
+    }
+
+    // STEP 1: Capture email immediately
+    function handleEmailStep(loc) {
+        const ids = getIds(loc);
+        const email = ids.emailInput.value.trim().toLowerCase();
+
+        if (!email || !isValidEmail(email)) {
+            ids.emailInput.style.borderColor = '#f97066';
+            setTimeout(() => { ids.emailInput.style.borderColor = ''; }, 2000);
+            return;
+        }
+
+        formState[loc].email = email;
+
+        // Submit email right away (even before extra fields)
+        submitToSheets({ email: email, source: 'waitlist', step: 'email_only', timestamp: new Date().toISOString() });
+
+        // Hide email form row, show extended fields
+        ids.form.style.display = 'none';
+        ids.note.classList.add('visible');
+        ids.extended.classList.add('visible');
+
+        // Focus first extended field
+        setTimeout(() => { ids.name.focus(); }, 200);
+    }
+
+    // STEP 2: Full submit with extra fields
+    async function handleFullSubmit(loc) {
+        const ids = getIds(loc);
+        const btn = ids.extended.querySelector('.submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        const data = {
+            email: formState[loc].email,
+            name: ids.name.value.trim(),
+            company: ids.company.value.trim(),
+            role: ids.role.value || '',
+            use_case: ids.use.value || '',
+            source: 'waitlist',
+            step: 'full_profile',
+            timestamp: new Date().toISOString()
+        };
+
+        await submitToSheets(data);
+
+        ids.extended.classList.remove('visible');
+        ids.extended.style.display = 'none';
+        ids.note.classList.remove('visible');
+        ids.note.style.display = 'none';
+        ids.success.style.display = 'flex';
+    }
+
+    // SKIP: Just keep the email
+    function handleSkip(loc) {
+        const ids = getIds(loc);
+        ids.extended.classList.remove('visible');
+        ids.extended.style.display = 'none';
+        ids.note.classList.remove('visible');
+        ids.note.style.display = 'none';
+        ids.success.style.display = 'flex';
+    }
+
+    // Enter key support
+    document.querySelectorAll('.waitlist-form input[type="email"]').forEach(input => {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const loc = input.id === 'email-input' ? 'top' : 'bottom';
+                handleEmailStep(loc);
+            }
+        });
+    });
+
+</script>
+
+<!-- Statement Crossfader — vanilla JS, no dependencies -->
+<script>
+(function() {
+    var section = document.getElementById('statements-section');
+    var pin = document.getElementById('statements-pin');
+    var slides = document.querySelectorAll('.statement-slide');
+    var totalSlides = slides.length;
+    if (!section || !pin || totalSlides === 0) return;
+
+    // Each slide gets 1 viewport of scroll distance
+    var pinDuration = window.innerHeight * totalSlides;
+    section.style.height = (window.innerHeight + pinDuration) + 'px';
+
+    function easeOut(t) { return t * (2 - t); }
+    function easeIn(t) { return t * t; }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    // Per-slide lifecycle as function of local progress [0..1]
+    function getSlideState(p, isFirst, isLast) {
+        var mainOpacity, mainY, revealOpacity, revealY;
+
+        // ENTER: main text fades in (first slide starts visible)
+        if (isFirst) {
+            mainOpacity = 1; mainY = 0;
+        } else {
+            var enterP = clamp(p / 0.15, 0, 1);
+            mainOpacity = easeOut(enterP);
+            mainY = 40 * (1 - easeOut(enterP));
+        }
+
+        // REVEAL: subtext fades in at 15–35%
+        var revealP = clamp((p - 0.15) / 0.2, 0, 1);
+        revealOpacity = easeOut(revealP);
+        revealY = 20 * (1 - easeOut(revealP));
+
+        // EXIT: both fade out at 70–95% (last slide stays)
+        if (!isLast && p > 0.70) {
+            var exitP = clamp((p - 0.70) / 0.25, 0, 1);
+            var exitFactor = 1 - easeIn(exitP);
+            mainOpacity *= exitFactor;
+            revealOpacity *= exitFactor;
+            mainY += -30 * easeIn(exitP);
+            revealY += -15 * easeIn(exitP);
+        }
+
+        return { mo: mainOpacity, my: mainY, ro: revealOpacity, ry: revealY };
+    }
+
+    function onStatementsScroll() {
+        var rect = section.getBoundingClientRect();
+        var sectionScroll = -rect.top;
+
+        // Pin logic
+        if (sectionScroll < 0) {
+            pin.style.position = 'relative';
+            pin.style.top = '0';
+        } else if (sectionScroll <= pinDuration) {
+            pin.style.position = 'fixed';
+            pin.style.top = '0';
+            pin.style.left = '0';
+            pin.style.right = '0';
+        } else {
+            pin.style.position = 'relative';
+            pin.style.top = pinDuration + 'px';
+        }
+
+        var progress = clamp(sectionScroll / pinDuration, 0, 1);
+        var scaled = progress * totalSlides; // 0..3
+
+        slides.forEach(function(slide, i) {
+            var main = slide.querySelector('.statement-main');
+            var reveal = slide.querySelector('.statement-reveal');
+            var localP = clamp(scaled - i, 0, 1);
+            var nearRange = (scaled >= i - 0.05 && scaled <= i + 1.05);
+
+            if (!nearRange) {
+                main.style.opacity = '0';
+                reveal.style.opacity = '0';
+                return;
+            }
+
+            var s = getSlideState(localP, i === 0, i === totalSlides - 1);
+            main.style.opacity = clamp(s.mo, 0, 1);
+            main.style.transform = 'translateY(' + s.my + 'px)';
+            reveal.style.opacity = clamp(s.ro, 0, 1);
+            reveal.style.transform = 'translateY(' + s.ry + 'px)';
+        });
+    }
+
+    window.addEventListener('scroll', onStatementsScroll, { passive: true });
+    onStatementsScroll();
+})();
+</script>
+
+</body>
+</html>
