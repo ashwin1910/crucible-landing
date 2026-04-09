@@ -2147,15 +2147,31 @@
     var pinDuration = window.innerHeight * totalSlides;
     section.style.height = (window.innerHeight + pinDuration) + 'px';
 
+    // Promote layers for GPU compositing (prevents jank on iOS)
+    pin.style.willChange = 'transform';
+    slides.forEach(function(slide) {
+        var main = slide.querySelector('.statement-main');
+        var reveal = slide.querySelector('.statement-reveal');
+        main.style.willChange = 'transform, opacity';
+        reveal.style.willChange = 'transform, opacity';
+        // Force GPU layers
+        main.style.backfaceVisibility = 'hidden';
+        reveal.style.backfaceVisibility = 'hidden';
+        main.style.webkitBackfaceVisibility = 'hidden';
+        reveal.style.webkitBackfaceVisibility = 'hidden';
+    });
+
     function easeOut(t) { return t * (2 - t); }
     function easeIn(t) { return t * t; }
     function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    // Track last pin state to avoid redundant style writes
+    var lastPinState = '';
 
     // Per-slide lifecycle as function of local progress [0..1]
     function getSlideState(p, isFirst, isLast) {
         var mainOpacity, mainY, revealOpacity, revealY;
 
-        // ENTER: main text fades in (first slide starts visible)
         if (isFirst) {
             mainOpacity = 1; mainY = 0;
         } else {
@@ -2164,12 +2180,10 @@
             mainY = 40 * (1 - easeOut(enterP));
         }
 
-        // REVEAL: subtext fades in at 15–35%
         var revealP = clamp((p - 0.15) / 0.2, 0, 1);
         revealOpacity = easeOut(revealP);
         revealY = 20 * (1 - easeOut(revealP));
 
-        // EXIT: both fade out at 70–95% (last slide stays)
         if (!isLast && p > 0.70) {
             var exitP = clamp((p - 0.70) / 0.25, 0, 1);
             var exitFactor = 1 - easeIn(exitP);
@@ -2182,26 +2196,42 @@
         return { mo: mainOpacity, my: mainY, ro: revealOpacity, ry: revealY };
     }
 
-    function onStatementsScroll() {
+    function updateStatements() {
         var rect = section.getBoundingClientRect();
         var sectionScroll = -rect.top;
 
-        // Pin logic
+        // Pin logic — only update DOM when state actually changes
+        var newPinState;
         if (sectionScroll < 0) {
-            pin.style.position = 'relative';
-            pin.style.top = '0';
+            newPinState = 'before';
         } else if (sectionScroll <= pinDuration) {
-            pin.style.position = 'fixed';
-            pin.style.top = '0';
-            pin.style.left = '0';
-            pin.style.right = '0';
+            newPinState = 'pinned';
         } else {
-            pin.style.position = 'relative';
-            pin.style.top = pinDuration + 'px';
+            newPinState = 'after';
+        }
+
+        if (newPinState !== lastPinState) {
+            lastPinState = newPinState;
+            if (newPinState === 'before') {
+                pin.style.position = 'relative';
+                pin.style.top = '0';
+                pin.style.left = '';
+                pin.style.right = '';
+            } else if (newPinState === 'pinned') {
+                pin.style.position = 'fixed';
+                pin.style.top = '0';
+                pin.style.left = '0';
+                pin.style.right = '0';
+            } else {
+                pin.style.position = 'relative';
+                pin.style.top = pinDuration + 'px';
+                pin.style.left = '';
+                pin.style.right = '';
+            }
         }
 
         var progress = clamp(sectionScroll / pinDuration, 0, 1);
-        var scaled = progress * totalSlides; // 0..3
+        var scaled = progress * totalSlides;
 
         slides.forEach(function(slide, i) {
             var main = slide.querySelector('.statement-main');
@@ -2216,15 +2246,28 @@
             }
 
             var s = getSlideState(localP, i === 0, i === totalSlides - 1);
+            // Use translate3d to force GPU compositing (smoother on iOS)
             main.style.opacity = clamp(s.mo, 0, 1);
-            main.style.transform = 'translateY(' + s.my + 'px)';
+            main.style.transform = 'translate3d(0,' + s.my + 'px,0)';
             reveal.style.opacity = clamp(s.ro, 0, 1);
-            reveal.style.transform = 'translateY(' + s.ry + 'px)';
+            reveal.style.transform = 'translate3d(0,' + s.ry + 'px,0)';
         });
     }
 
+    // Use rAF to debounce scroll — prevents double-painting on iOS
+    var ticking = false;
+    function onStatementsScroll() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                updateStatements();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+
     window.addEventListener('scroll', onStatementsScroll, { passive: true });
-    onStatementsScroll();
+    updateStatements();
 })();
 </script>
 
