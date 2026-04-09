@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crucible - The Brain That Thinks. The Body That Acts.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -225,7 +225,7 @@
             border: 1px solid rgba(0,0,0,0.08);
             border-radius: 10px;
             color: var(--text);
-            font-size: 14px;
+            font-size: 16px;
             font-family: 'Inter', sans-serif;
             outline: none;
             transition: all 0.2s;
@@ -286,7 +286,7 @@
             border: 1px solid rgba(0,0,0,0.08);
             border-radius: 10px;
             color: var(--text);
-            font-size: 13px;
+            font-size: 16px;
             font-family: 'Inter', sans-serif;
             outline: none;
             transition: all 0.2s;
@@ -999,9 +999,14 @@
             #three-container { left: 0; right: -20%; opacity: 0.25; }
             .waitlist-form { flex-direction: column; width: 100%; }
             .waitlist-form input[type="email"] { width: 100%; }
-            .waitlist-form button { width: 100%; }
+            .waitlist-form button { width: 100%; min-height: 48px; }
             .waitlist-extended .field-row { flex-direction: column; }
             .waitlist-extended { max-width: 100%; }
+            .waitlist-extended input,
+            .waitlist-extended select { min-height: 48px; font-size: 16px; }
+            .waitlist-extended .submit-btn { width: 100%; min-height: 48px; }
+            .waitlist-extended .skip-link { padding: 12px 0; font-size: 14px; }
+            .bottom-cta .waitlist-form { align-items: stretch; }
             .statement-sticky { padding: 24px; }
             .reveal-sticky { padding: 24px; }
             .bottom-cta { padding: 24px; }
