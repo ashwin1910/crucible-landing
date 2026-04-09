@@ -1893,27 +1893,34 @@
         const heroHeight = heroScrollSpace.offsetHeight;
         const viewportH = window.innerHeight;
 
-        // ── Phase 1→2: Hero scroll progress (0–1 over 1.5 extra viewports)
-        const heroScrollRange = heroHeight - viewportH;
-        const heroProgress = Math.min(Math.max(scrollY / heroScrollRange, 0), 1);
+        // ── On mobile: skip ALL hero scroll effects (fade, zoom, nav hide)
+        // The hero is flattened to normal flow, so these effects would
+        // fight with the iOS keyboard and cause the form to disappear.
+        if (!isMobile) {
+            // ── Phase 1→2: Hero scroll progress (0–1 over 1.5 extra viewports)
+            const heroScrollRange = heroHeight - viewportH;
+            const heroProgress = Math.min(Math.max(scrollY / heroScrollRange, 0), 1);
 
-        // Fade out hero text (0 → 0.3)
-        const textFade = 1 - Math.min(heroProgress / 0.3, 1);
-        heroContent.style.opacity = textFade;
+            // Fade out hero text (0 → 0.3)
+            const textFade = 1 - Math.min(heroProgress / 0.3, 1);
+            heroContent.style.opacity = textFade;
 
-        // Fade out scroll hint faster
-        scrollHint.style.opacity = Math.max(1 - heroProgress * 5, 0);
+            // Fade out scroll hint faster
+            scrollHint.style.opacity = Math.max(1 - heroProgress * 5, 0);
 
-        // Hide nav during zoom, show again after hero
-        const pastHero = scrollY > heroHeight;
-        if (heroProgress > 0.2 && !pastHero) {
-            mainNav.classList.add('hidden');
-        } else {
-            mainNav.classList.remove('hidden');
+            // Hide nav during zoom, show again after hero
+            const pastHero = scrollY > heroHeight;
+            if (heroProgress > 0.2 && !pastHero) {
+                mainNav.classList.add('hidden');
+            } else {
+                mainNav.classList.remove('hidden');
+            }
         }
 
         // Three.js scroll effects — desktop only
         if (!isMobile && threeContainer) {
+            const heroScrollRange = heroHeight - viewportH;
+            const heroProgress = Math.min(Math.max(scrollY / heroScrollRange, 0), 1);
             // Move three-container from right-side to fullscreen
             const containerProgress = Math.min(heroProgress / 0.5, 1);
             const eased = containerProgress * containerProgress * (3 - 2 * containerProgress);
@@ -2111,6 +2118,19 @@
             }
         });
     });
+
+    // iOS keyboard fix: when an input is focused on mobile,
+    // scroll it into view after a short delay (after keyboard animation)
+    if (isMobile) {
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('focus', () => {
+                // Wait for iOS keyboard to finish animating
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 350);
+            });
+        });
+    }
 
 </script>
 
